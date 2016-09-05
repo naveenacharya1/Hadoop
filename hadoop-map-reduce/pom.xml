@@ -9,7 +9,6 @@
   <description>Holds All Map Reduce Examples</description>
 
   <modules>
-  	<module>WorkCount</module>
   	<module>wordcount</module>
   </modules>
 </project>
