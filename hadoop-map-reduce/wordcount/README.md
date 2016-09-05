@@ -4,12 +4,12 @@ WordCount is a simple application that counts the number of occurrences of each 
 This works with a local-standalone, pseudo-distributed or fully-distributed Hadoop installation (Single Node Setup).
 
 # Prerequisite
-Apached Hadoop 2.7.1
-Apache Maven 3.3.9 
-Java version: 1.8.0_101, vendor: Oracle Corporation
-Default locale: en_SG, platform encoding: Cp1252
-OS name: "windows 10", version: "10.0", arch: "amd64", family: "dos"
-Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)
+Apached Hadoop 2.7.1  
+Apache Maven 3.3.9  
+Java version: 1.8.0_101, vendor: Oracle Corporation  
+Default locale: en_SG, platform encoding: Cp1252  
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "dos"  
+Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)  
 
 # Inputs and Outputs
 
