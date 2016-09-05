@@ -1,8 +1,17 @@
-## Synopsis
+## MapReduce - Word Count Program
 
-At the top of the file there should be a short introduction and/ or overview that explains **what** the project is. This description should match descriptions added for package managers (Gemspec, package.json, etc.)
+WordCount is a simple application that counts the number of occurrences of each word in a given input set.
+This works with a local-standalone, pseudo-distributed or fully-distributed Hadoop installation (Single Node Setup).
 
-## Code Example
+# Prerequisite
+Apached Hadoop 2.7.1
+Apache Maven 3.3.9 
+Java version: 1.8.0_101, vendor: Oracle Corporation
+Default locale: en_SG, platform encoding: Cp1252
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "dos"
+Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)
+
+# Inputs and Outputs
 
 Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
 
