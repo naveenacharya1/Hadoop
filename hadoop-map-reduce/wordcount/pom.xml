@@ -8,9 +8,9 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>hadoop-map-reduce</groupId>
-  <artifactId>WorkCount</artifactId>
+  <artifactId>wordcount</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>WorkCount</name>
+  <name>wordcount</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
