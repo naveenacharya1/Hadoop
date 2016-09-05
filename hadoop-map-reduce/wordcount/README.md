@@ -1,9 +1,9 @@
-## MapReduce - Word Count Program
+# MapReduce - Word Count Program
 
 WordCount is a simple application that counts the number of occurrences of each word in a given input set.
 This works with a local-standalone, pseudo-distributed or fully-distributed Hadoop installation (Single Node Setup).
 
-# Prerequisite
+## Prerequisite
 Apached Hadoop 2.7.1  
 Apache Maven 3.3.9  
 Java version: 1.8.0_101, vendor: Oracle Corporation  
