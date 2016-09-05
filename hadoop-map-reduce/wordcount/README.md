@@ -11,9 +11,15 @@ Default locale: en_SG, platform encoding: Cp1252
 OS name: "windows 10", version: "10.0", arch: "amd64", family: "dos"  
 Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)  
 
-# Inputs and Outputs
+## Inputs and Outputs
 
-Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. Make sure the API you are showing off is obvious, and that your code is short and concise.
+The MapReduce framework operates exclusively on <key, value> pairs, that is, the framework views the input to the job as a set of <key, value> pairs and produces a set of <key, value> pairs as the output of the job, conceivably of different types.  
+
+The key and value classes have to be serializable by the framework and hence need to implement the Writable interface. Additionally, the key classes have to implement the WritableComparable interface to facilitate sorting by the framework.  
+
+Input and Output types of a MapReduce job:  
+
+(input) <k1, v1> -> map -> <k2, v2> -> combine -> <k2, v2> -> reduce -> <k3, v3> (output)  
 
 ## Motivation
 
