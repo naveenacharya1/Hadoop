@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.navi.hadoop.exmaples;
+package com.hdp.madreduce.example;
 
 import java.net.URI;
 
@@ -20,8 +20,8 @@ public class WordCount {
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 
-		Path inputPath = new Path("hdfs://127.0.0.1:9000/in/wordcount.txt");
-		Path outputPath = new Path("hdfs://127.0.0.1:9000/out/result");
+		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/WordCountSample.txt");
+		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/result");
 
 		@SuppressWarnings("deprecation")
 		Job job = new Job();

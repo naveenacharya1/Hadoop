@@ -9,6 +9,6 @@
   <description>Holds All Map Reduce Examples</description>
 
   <modules>
-  	<module>wordcount</module>
+  	<module>WordCountMR</module>
   </modules>
 </project>

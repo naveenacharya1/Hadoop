@@ -8,8 +8,8 @@
 		<artifactId>hadoop-map-reduce</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>wordcount</artifactId>
-	<name>wordcount</name>
+	<artifactId>WordCountMR</artifactId>
+	<name>WordCountMR</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -145,7 +145,5 @@
 			<artifactId>hadoop-yarn-applications-distributedshell</artifactId>
 			<version>2.7.1</version>
 		</dependency>
-
-
 	</dependencies>
 </project>

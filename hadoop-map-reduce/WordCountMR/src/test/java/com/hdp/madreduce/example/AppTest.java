@@ -1,4 +1,4 @@
-package com.navi.hadoop.exmaples;
+package com.hdp.madreduce.example;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

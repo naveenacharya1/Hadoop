@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.navi.hadoop.exmaples;
+package com.hdp.madreduce.example;
 
 /**
  * @author Naveen
