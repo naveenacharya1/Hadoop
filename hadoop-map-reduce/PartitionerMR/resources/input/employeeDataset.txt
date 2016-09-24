@@ -1,0 +1,10 @@
+1401	Mark	30	Male	$5000
+1402	Adam	34	Female	$7000
+1403	Philip	40	Male	$15000
+1404	Sam	44	Male	$8000
+1405	Joseph	34	Male	$9000
+1406	Andrew	22	Female	$12000
+1407	Julian	20	Female	$11000
+1408	Tim	18	Female	$13000
+1409	Tam	27	Male	$6000
+1410	Bob	18	Male	$3000

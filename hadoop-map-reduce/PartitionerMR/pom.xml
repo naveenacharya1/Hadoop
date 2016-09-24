@@ -8,8 +8,10 @@
 		<artifactId>hadoop-map-reduce</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>WordCountMR</artifactId>
-	<name>WordCountMR</name>
+	<groupId>hadoop-map-reduce</groupId>
+	<artifactId>PartitionerMR</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>PartitionerMR</name>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -146,9 +148,9 @@
 			<version>2.7.1</version>
 		</dependency>
 		<dependency>
-    <groupId>org.apache.derby</groupId>
-    <artifactId>derbytools</artifactId>
-    <version>10.10.2.0</version>
-</dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbytools</artifactId>
+			<version>10.10.2.0</version>
+		</dependency>
 	</dependencies>
 </project>

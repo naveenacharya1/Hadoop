@@ -10,5 +10,6 @@
 
   <modules>
   	<module>WordCountMR</module>
+    <module>PartitionerMR</module>
   </modules>
 </project>
