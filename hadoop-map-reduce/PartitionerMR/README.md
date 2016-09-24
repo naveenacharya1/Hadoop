@@ -17,7 +17,7 @@ Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)
 ##Input Data
 ```bash
 ID		Name	Age		Gender	Salary
-
+```
 ```bash
 1401	Mark	30		Male	$5000  
 1402	Adam	34		Female	$7000  
@@ -32,21 +32,21 @@ ID		Name	Age		Gender	Salary
 ```
 We have to write an application to process the input dataset to find the highest salaried employee by gender in different age groups (for example, below 20, between 21 to 30, above 30).
 
-Based on the given input, following is the algorithmic explanation of the program.
+##Output
 
-#Map Tasks  
-The map task accepts the key-value pairs as input while we have the text data in a text file. The input for this map task is as follows −
-
-##Input −  
-The key would be a pattern such as “any special key + filename + line number” (example: key = @input1) and the value would be the data in that line (example: value = 1401 \t Mark \t 30 \t Male \t $5000).
-
-Method − The operation of this map task is as follows −  
-
-Read the value (record data), which comes as input value from the argument list in a string.  
-
-Using the split function, separate the gender and store in a string variable.  
-
-
-
-
+Output in Part-00000
+```bash
+Female	$13000
+Male	$3000
+```
+Output in Part-00001
+```bash
+Female	$12000
+Male	$6000
+```
+Output in Part-00002
+```bash
+Female	$7000
+Male	$15000
+```
 Sample input/result files are provided in the project under resources/input, resources/output
