@@ -15,8 +15,9 @@ Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)
 ## Input/Output
 
 ##Input Data
-```bash
+
 *ID*	*Name*	*Age* *Gender*	*Salary*  
+```bash
 1401	Mark	30		Male	$5000  
 1402	Adam	34		Female	$7000  
 1403	Philip	40		Male	$15000  
