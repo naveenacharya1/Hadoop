@@ -1,8 +1,8 @@
 # MapReduce - Partitioner Program  
 
-A partitioner works like a condition in processing an input dataset. The partition phase takes place after the Map phase and before the Reduce phase.  
+* A partitioner works like a condition in processing an input dataset. The partition phase takes place after the Map phase and before the Reduce phase.  
 
-The number of partitioners is equal to the number of reducers. That means a partitioner will divide the data according to the number of reducers. Therefore, the data passed from a single partitioner is processed by a single Reducer.  
+* The number of partitioners is equal to the number of reducers. That means a partitioner will divide the data according to the number of reducers. Therefore, the data passed from a single partitioner is processed by a single Reducer.  
 
 ## Prerequisite
 Apached Hadoop 2.7.1  
@@ -15,19 +15,19 @@ Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)
 ## Input/Output
 
 ##Input Data
-
-ID		Name	Age	Gender	Salary  
-1401	Mark	30	Male	$5000  
-1402	Adam	34	Female	$7000  
-1403	Philip	40	Male	$15000  
-1404	Sam	44	Male	$8000  
-1405	Joseph	34	Male	$9000  
-1406	Andrew	22	Female	$12000  
-1407	Julian	20	Female	$11000  
-1408	Tim	18	Female	$13000  
-1409	Tam	27	Male	$6000  
-1410	Bob	18	Male	$3000  
-
+```bash
+*ID*	*Name*	*Age* *Gender*	*Salary*  
+1401	Mark	30		Male	$5000  
+1402	Adam	34		Female	$7000  
+1403	Philip	40		Male	$15000  
+1404	Sam		44		Male	$8000  
+1405	Joseph	34		Male	$9000  
+1406	Andrew	22		Female	$12000  
+1407	Julian	20		Female	$11000  
+1408	Tim		18		Female	$13000  
+1409	Tam		27		Male	$6000  
+1410	Bob		18		Male	$3000  
+```
 We have to write an application to process the input dataset to find the highest salaried employee by gender in different age groups (for example, below 20, between 21 to 30, above 30).
 
 Based on the given input, following is the algorithmic explanation of the program.
