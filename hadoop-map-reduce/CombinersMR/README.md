@@ -22,7 +22,6 @@ Default locale: en_SG, platform encoding: Cp1252
 OS name: "windows 10", version: "10.0", arch: "amd64", family: "dos"  
 Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)  
 
-#MapReduce Combiner Implementation
 The following example provides a theoretical idea about combiners. Let us assume we have the following input text file named wordcount.txt for MapReduce.
 ```bash
 What do you mean by Hadoop
@@ -34,9 +33,14 @@ How Hadoop executes mapreduce program
 ##Record Reader
 This is the first phase of MapReduce where the Record Reader reads every line from the input text file as text and yields output as key-value pairs.
 
-Input − Line by line text from the input file.
-
-Output − Forms the key-value pairs. The following is the set of expected key-value pairs.
+Input.
+```bash
+What do you mean by Hadoop
+What do you know about spark
+What is Hadoop File System
+How Hadoop executes mapreduce program
+```
+Output
 ```bash
 (1,What do you mean by Hadoop)
 (2,What do you know about spark)
@@ -46,7 +50,7 @@ Output − Forms the key-value pairs. The following is the set of expected key-v
 ##Map Phase
 The Map phase takes input from the Record Reader, processes it, and produces the output as another set of key-value pairs.
 
-Input − The following key-value pair is the input taken from the Record Reader.
+Input
 ```bash
 (1,What do you mean by Hadoop)
 (2,What do you know about spark)
@@ -55,7 +59,7 @@ Input − The following key-value pair is the input taken from the Record Reader
 ```
 The Map phase reads each key-value pair, divides each word from the value using StringTokenizer, treats each word as key and the count of that word as value.
 
-Output − The expected output is as follows −
+Output
 ```bash
 (What,1) (do,1) (you,1) (mean,1) (by,1) (Hadoop,1)
 (What,1) (do,1) (you,1) (know,1) (about,1) (spark,1)
@@ -63,10 +67,10 @@ Output − The expected output is as follows −
 (How,1) (Hadoop,1) (executes,1) (mapreduce,1) (program,1)
 ```
 
-#Combiner Phase
+##Combiner Phase
 The Combiner phase takes each key-value pair from the Map phase, processes it, and produces the output as key-value collection pairs.
 
-##Input.  
+Input.  
 ```bash
 (What,1) (do,1) (you,1) (mean,1) (by,1) (Hadoop,1)
 (What,1) (do,1) (you,1) (know,1) (about,1) (spark,1)
@@ -75,17 +79,17 @@ The Combiner phase takes each key-value pair from the Map phase, processes it, a
 ```
 The Combiner phase reads each key-value pair, combines the common words as key and values as collection. Usually, the code and operation for a Combiner is similar to that of a Reducer.
 
-##Output
+Output
 ```bash
 (What,1,1,1) (do,1,1) (you,1,1) (mean,1) (by,1) (Hadoop,1,1,1)
 (know,1) (about,1) (spark,1) 
 (is,1) (File,1) (System,1)
 (How,1) (executes,1) (mapreduce,1) (program,1)
 ```
-#Reducer Phase
+##Reducer Phase
 The Reducer phase takes each key-value collection pair from the Combiner phase, processes it, and passes the output as key-value pairs. Note that the Combiner functionality is same as the Reducer.
 
-##Input
+Input
 ```bash
 (What,1,1,1) (do,1,1) (you,1,1) (mean,1) (by,1) (Hadoop,1,1,1)
 (know,1) (about,1) (spark,1) 
@@ -93,17 +97,17 @@ The Reducer phase takes each key-value collection pair from the Combiner phase, 
 (How,1) (executes,1) (mapreduce,1) (program,1)
 ```
 
-##Output
+Output
 ```bash
 (What,2) (do,2) (you,2) (mean,1) (by,1) (Hadoop,3)
 (know,1) (about,1) (spark,1) 
 (is,1) (File,1) (System,1)
 (How,1) (executes,1) (mapreduce,1) (program,1)
 ```
-#Record Writer
+##Record Writer
 This is the last phase of MapReduce where the Record Writer writes every key-value pair from the Reducer phase and sends the output as text.
 
-##Input 
+Input 
 ```bash
 (What,2) (do,2) (you,2) (mean,1) (by,1) (Hadoop,3)
 (know,1) (about,1) (spark,1) 
@@ -111,7 +115,7 @@ This is the last phase of MapReduce where the Record Writer writes every key-val
 (How,1) (executes,1) (mapreduce,1) (program,1)
 ```
  
-##Output
+Output
 ```bash
 What		2 
 do			2 
