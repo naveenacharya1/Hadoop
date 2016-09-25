@@ -18,12 +18,14 @@ Imagine we have temperature data that looks like the following. Each line repres
 ```
 Let’s say we want for each year and month (the reducer key input, or alternatively, the mapper key output), to order the values descendingly by temperature when they come into the reducer. How do we sort the temperature values descendingly? This problem is known as secondary sorting. Hadoop’s M/R platform sorts the keys, but not the values.
 
-Expected output is:
+Expected value in the reducer is :
 ```bash
-201201:  5,10,35,45
-200111: 40,46,47,48
-200508: 38,50,52,70
+201201 [5,10,35,45]
+200111 [40,46,47,48]
+200508 [38,50,52,70]
 ```
+(where YEARMONTH is sorted by ascending order and list of temperature values are sorted by descending order)  
+
 A solution for secondary sorting involves doing multiple things. Since we know Year and Month can form a Key, we make combination of YEARMONTH as a KEY and 
 First, instead of simply emitting the YEARMONTH as the key from the mapper, we need to emit a composite key, a key that has multiple parts. (Composite is a combination of key and a part of value or complete value). Now in our example, the key will have the YEARMONTH and TEMPERATURE. If you remember, the process for a M/R Job is as follows.
 
