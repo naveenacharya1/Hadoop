@@ -64,7 +64,7 @@ public class CompositeKeyComparator extends WritableComparator {
     }
 }
 ```
-##USE A NATURAL KEY GROUPING COMPARATOR
+##Grouping comparator
 
 The natural key group comparator _groups_ values together according to the natural key. Without this component, each K2={YEARMONTH,TEMPERATURE} and its associated V2=TEMPERATURE may go to different reducers. Notice here, we only consider the _natural_ key.
 
@@ -84,10 +84,9 @@ public class NaturalKeyGroupingComparator extends WritableComparator {
 }
 ```
 
-##USE A NATURAL KEY PARTITIONER
+##Custom partitioner
 
-The natural key partitioner uses the natural key to partition the data to the reducer(s). Again, note that here, we only consider the _natural_ key.
-
+In a nutshell, the partitioner decides which mapper’s output goes to which reducer based on the mapper’s output key. For this, we need two plug-in classes: a custom partitioner to control which reducer processes which keys, and a custom Comparator to sort reducer values. The custom partitioner ensures that all data with the same key (the natural key, not including the composite key with the temperature value) is sent to the same reducer. The custom Comparator does sorting so that the natural key (YEARMONTH) groups the data once it arrives at the reducer.
 
 ```bash
 public class NaturalKeyPartitioner extends Partitioner<StockKey, DoubleWritable> {
@@ -140,5 +139,53 @@ public class SsJob extends Configured implements Tool {
     }
 }
 ```
+##Data Flow Using Plug-in Classes
+
+To help you understand the map() and reduce() functions and custom plug-in classes, Figure 1-2 illustrates the data flow for a portion of input.
+
+```bash
+
+----------------						   ----------------------
+|  2012,01,5	|                          |  ((201201,5),5)	|
+|  2012,01,45   |                          |  ((201201,45),45)  |
+|  2012,01,35   |                          |  ((201201,35),35)  |
+|  2012,01,10   | 		-------------      |  ((201201,10),10)  |	   ------------------
+|  2001,11,46   | 		|			|      |  ((200111,46),46)  |      |				|
+|  2001,11,47   | ----->|	map()	|----> |  ((200111,47),47)  |----> |	partition()	|
+|  2001,11,48   | 		|			|      |  ((200111,48),48)  |      |				|
+|  2001,11,40   | 		-------------      |  ((200111,40),40)  |      ------------------
+|  2005,08,50   |                          |  ((200508,50),50)  |				|
+|  2005,08,52   |                          |  ((200508,52),52)  |				|
+|  2005,08,38   |                          |  ((200508,38),38)  |				|
+|  2005,08,70   |                          |  ((200508,70),70)  |				|
+----------------                           ----------------------				|
+																				|
+																				|
+																				|
+																				|
+                                												|				
+                                								-----------------------|	   
+                                								|	-----------------  |	   
+                                								|	|  2012,01,5	|  |	
+                                								|	|  2012,01,45   |  |	
+                                								|	|  2012,01,35   |  |	
+                                  ------------------- 			|	|  2012,01,10	|  |	
+ ---------------------------	  |					| 			|	|---------------|  |					
+ |  (201201 [5,10,35,45])  |	  |   group()		|<---------	|	|  2001,11,46   |  |				
+ |  (200111 [40,46,47,48]) |<-----|   comparator()	|			|  	|  2001,11,47   |  |					
+ |  (200508 [38,50,52,70]) |	  |	  reduce()| 	|			|	|  2001,11,48   |  |								
+ ---------------------------	  |					|  			|	|	2001,11,40	|  |							
+						          |-----------------|			|	|---------------|  |		
+                                								|	|  2005,08,50   |  |		
+                                								|	|  2005,08,52   |  |		
+						        								|	|  2005,08,38   |  |		
+						        								|	|  2005,08,70   |  |		
+					            								|	----------------   |		
+					            								------------------------																		
+                                                        
+                                                        
+```
+
+
 
 Sample input/result files are provided in the project under resources/input, resources/output
