@@ -21,8 +21,9 @@ Now the obvious question is why does Hadoop use these types instead of Java type
 As we already know, data needs to be transmitted between different nodes in a distributed computing environment. This requires serialization and deserialization of data to convert the data that is in structured format to byte stream and vice-versa. Hadoop therefore uses simple and efficient serialization protocol to serialize data between map and reduce phase and these are called Writable(s).    
 
 ##Custom Writable
-So any user defined class that implements the Writable interface is a custom writable. However, we need a custom Writable comparable if our custom data type is going to be used as key rather that the value. We then need the class to implement WritableComparable interface.  
-
+So any user defined class that implements the Writable interface is a custom writable. However, we need a custom Writable comparable if our custom data type is going to be used as key rather that the value. We then need the class to implement WritableComparable interface. 
+ 
+##Input Data
 Input.
 ```bash
 What do you mean by Hadoop
