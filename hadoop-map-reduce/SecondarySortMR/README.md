@@ -20,9 +20,9 @@ Let’s say we want for each year and month (the reducer key input, or alternati
 
 Expected value in the reducer is :
 ```bash
-201201 [5,10,35,45]
-200111 [40,46,47,48]
-200508 [38,50,52,70]
+200111 [48,47,46,40]
+200508 [70,52,50,38]
+201201 [45,35,10,5]
 ```
 (where YEARMONTH is sorted by ascending order and list of temperature values are sorted by descending order)  
 
@@ -40,7 +40,7 @@ So, K2=YEARMONTH, and V2=TEMPERATURE, or (K2,V2) = (YEARMONTH,TEMPERATURE). Howe
 ({YEARMONTH,TEMPERATURE},List[TEMPERATURE]) –> Reduce –> (YEARMONTH,TEMPERATURE)
 ```
 
-K2 is a composite key, but inside it, the symbol part/component is referred to as the _natural_ key. It is the key which values will be grouped by.
+K2 is a composite key, but inside it, the YEARMONTH part/component is referred to as the _natural_ key. It is the key which values will be grouped by.
 
 ##USE A COMPOSITE KEY COMPARATOR
 The composite key comparator is where the secondary sorting takes place. It compares composite key by YEARMONTH ascendingly and TEMPERATURE descendingly. It is shown below. Notice here we sort based on YEARMONTH and TEMPERATURE. All the components of the composite key is considered.
