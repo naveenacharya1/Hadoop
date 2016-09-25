@@ -13,5 +13,7 @@
     <module>PartitionerMR</module>
     <module>CombinersMR</module>
     <module>CustomInputReaderMR</module>
+    <module>DistributedcacheMR</module>
+    <module>CustomWritableMR</module>
   </modules>
 </project>
