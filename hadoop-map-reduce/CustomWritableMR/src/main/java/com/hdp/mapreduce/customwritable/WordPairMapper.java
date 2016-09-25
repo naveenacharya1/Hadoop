@@ -36,7 +36,7 @@ public class WordPairMapper extends MapReduceBase implements Mapper<LongWritable
 					secondWord = new Text(word);
 				} else {
 					firstWord.set(word);
-					wordPair.set(firstWord, secondWord);
+					wordPair.set(secondWord,firstWord);
 					output.collect(new Text(wordPair.toString()), one);
 					secondWord.set(firstWord.toString());
 				}

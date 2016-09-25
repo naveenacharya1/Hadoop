@@ -32,25 +32,25 @@ How Hadoop executes mapreduce program
 ```
 ##Output
 ```bash
-File Hadoop	1
-Hadoop How	1
-Hadoop by	1
-Hadoop is	1
-How System	1
-System File	1
-What Hadoop	1
-What spark	1
-about know	1
-by mean	1
-do What	2
-executes Hadoop	1
-is What	1
-know you	1
-mapreduce executes	1
-mean you	1
-program mapreduce	1
-spark about	1
-you do	2
+File System	1
+Hadoop File	1
+Hadoop What	1
+Hadoop executes	1
+How Hadoop	1
+System How	1
+What do	2
+What is	1
+about spark	1
+by Hadoop	1
+do you	2
+executes mapreduce	1
+is Hadoop	1
+know about	1
+mapreduce program	1
+mean by	1
+spark What	1
+you know	1
+you mean	1
 ```
 
 Sample input/result files are provided in the project under resources/input, resources/output
