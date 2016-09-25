@@ -15,5 +15,6 @@
     <module>CustomInputReaderMR</module>
     <module>DistributedcacheMR</module>
     <module>CustomWritableMR</module>
+    <module>SecondarySortMR</module>
   </modules>
 </project>
