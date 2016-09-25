@@ -141,7 +141,7 @@ public class SsJob extends Configured implements Tool {
 ```
 ##Data Flow Using Plug-in Classes
 
-To help you understand the map() and reduce() functions and custom plug-in classes, Figure 1-2 illustrates the data flow for a portion of input.
+To help you understand the map() and reduce() functions and custom plug-in classes,below diagram illustrates the data flow for a portion of input.  
 
 ```bash
 
