@@ -24,14 +24,13 @@ As we already know, data needs to be transmitted between different nodes in a di
 So any user defined class that implements the Writable interface is a custom writable. However, we need a custom Writable comparable if our custom data type is going to be used as key rather that the value. We then need the class to implement WritableComparable interface. 
  
 ##Input Data
-Input.
 ```bash
 What do you mean by Hadoop
 What do you know about spark
 What is Hadoop File System
 How Hadoop executes mapreduce program
 ```
-Output
+##Output
 ```bash
 File Hadoop	1
 Hadoop How	1
