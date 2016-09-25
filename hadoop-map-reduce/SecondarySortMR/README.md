@@ -26,7 +26,7 @@ Expected value in the reducer is :
 ```
 (where YEARMONTH is sorted by ascending order and list of temperature values are sorted by descending order)  
 
-A solution for secondary sorting involves doing multiple things. Since we know Year and Month can form a Key, we make combination of YEARMONTH as a KEY and instead of simply emitting the YEARMONTH as the key from the mapper, we need to emit a composite key, a key that has multiple parts. (Composite is a combination of key and a part of value or complete value). Now in our example, the key will have the {YEARMONTH and TEMPERATURE} and value as TEMPERATURE. If you remember, the process for a M/R Job is as follows.
+A solution for secondary sorting involves doing multiple things. Since we know Year and Month can form a Key, we make combination of YEARMONTH as a KEY and instead of simply emitting the YEARMONTH as the key from the mapper, we need to emit a composite key, a key that has multiple parts. (Composite is a combination of key and a part of value or complete value). Now in our example, the key will be {YEARMONTH and TEMPERATURE} and value will be TEMPERATURE. If you remember, the process for a M/R Job is as follows.
 
 ```bash
 (K1,V1) –> Map –> (K2,V2)
