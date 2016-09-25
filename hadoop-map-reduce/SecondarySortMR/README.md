@@ -1,14 +1,6 @@
 # MapReduce - Secondary Sort Program
 
-## Prerequisite
-Apached Hadoop 2.7.1  
-Apache Maven 3.3.9  
-Java version: 1.8.0_101, vendor: Oracle Corporation  
-Default locale: en_SG, platform encoding: Cp1252  
-OS name: "windows 10", version: "10.0", arch: "amd64", family: "dos"  
-Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)  
-
-* Imagine we have temperature data that looks like the following. Each line represents the value of a temperature at a particular day. Each value in a line is delimited by a comma. The first value is the YEAR, the second value is the MONTH, and the third value is the TEMPERATURE value. The data below is a toy data set. As you can see, there are three Year: 2012, 2001, and 2005. The Month are also simple: 01, 11, 08. The values are fake as well: 5,45,35,10,46,47,48,50,52,38 and 70.
+Imagine we have temperature data that looks like the following. Each line represents the value of a temperature at a particular day. Each value in a line is delimited by a comma. The first value is the YEAR, the second value is the MONTH, and the third value is the TEMPERATURE value. The data below is a toy data set. As you can see, there are three Year: 2012, 2001, and 2005. The Month are also simple: 01, 11, 08. The values are fake as well: 5,45,35,10,46,47,48,50,52,38 and 70.
 
 ```bash
 2012,01,5
@@ -24,7 +16,7 @@ Eclipse Java EE IDE for Web Developers. Version: Mars.2 Release (4.5.2)
 2005,08,38
 2005,08,70
 ```
-* Let’s say we want for each year and month (the reducer key input, or alternatively, the mapper key output), to order the values descendingly by temperature when they come into the reducer. How do we sort the temperature values descendingly? This problem is known as secondary sorting. Hadoop’s M/R platform sorts the keys, but not the values.
+Let’s say we want for each year and month (the reducer key input, or alternatively, the mapper key output), to order the values descendingly by temperature when they come into the reducer. How do we sort the temperature values descendingly? This problem is known as secondary sorting. Hadoop’s M/R platform sorts the keys, but not the values.
 
 Expected output is:
 ```bash
@@ -40,7 +32,7 @@ First, instead of simply emitting the YEARMONTH as the key from the mapper, we n
 (K2,List[V2]) –> Reduce –> (K3,V3)
 ```
 
-In the toy data above, K1 will be of type LongWritable, and V1 will be of type Text. Without secondary sorting, K2 will be of type Text and V2 will be of type IntWritable (we simply emit the YEARMONTH and price from the TEMPERATURE to the reducer).  
+In the toy data above, K1 will be of type LongWritable, and V1 will be of type Text. Without secondary sorting, K2 will be of type Text and V2 will be of type IntWritable (we simply emit the YEARMONTH and TEMPERATURE from the mapper to the reducer).  
 So, K2=YEARMONTH, and V2=TEMPERATURE, or (K2,V2) = (YEARMONTH,TEMPERATURE). However, if we emit such an intermediary key-value pair, secondary sorting is not possible. We have to emit a composite key, K2={YEARMONTH,TEMPERATURE}. So the intermediary key-value pair is (K2,V2) = ({YEARMONTH,TEMPERATURE},TEMPERATURE). Note that composite data structures, such as the composite key, is held within the curly braces. Our reducer simply outputs a K3 of type IntWritable and V3 of type IntWritable; (K3,V3) = (YEARMONTH, TEMPERATURE). The complete M/R job with the new composite key is shown below.
 ```bash
 (LongWritable,Text) –> Map –> ({YEARMONTH,TEMPERATURE},TEMPERATURE)
@@ -49,7 +41,7 @@ So, K2=YEARMONTH, and V2=TEMPERATURE, or (K2,V2) = (YEARMONTH,TEMPERATURE). Howe
 
 K2 is a composite key, but inside it, the symbol part/component is referred to as the _natural_ key. It is the key which values will be grouped by.
 
-#USE A COMPOSITE KEY COMPARATOR
+##USE A COMPOSITE KEY COMPARATOR
 The composite key comparator is where the secondary sorting takes place. It compares composite key by YEARMONTH ascendingly and TEMPERATURE descendingly. It is shown below. Notice here we sort based on YEARMONTH and TEMPERATURE. All the components of the composite key is considered.
 
 ```bash
