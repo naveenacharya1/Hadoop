@@ -1,6 +1,6 @@
 # MapReduce - Secondary Sort Program
 
-Imagine we have temperature data that looks like the following. Each line represents the value of a temperature at a particular day. Each value in a line is delimited by a comma. The first value is the YEAR, the second value is the MONTH, and the third value is the TEMPERATURE value. The data below is a toy data set. As you can see, there are three Year: 2012, 2001, and 2005. The Month are also simple: 01, 11, 08. The values are fake as well: 5,45,35,10,46,47,48,50,52,38 and 70.
+Imagine we have temperature data that looks like the following. Each line represents the value of a temperature at a particular year and month. Each value in a line is delimited by a comma. The first value is the YEAR, the second value is the MONTH, and the third value is the TEMPERATURE value. The data below is a toy data set. As you can see, there are three Years: 2012, 2001, and 2005. The Month are also simple: 01, 11, 08. The values are fake as well: 5,45,35,10,46,47,48,50,52,38 and 70.
 
 ```bash
 2012,01,5
@@ -24,7 +24,7 @@ Expected value in the reducer is :
 200508 [70,52,50,38]
 201201 [45,35,10,5]
 ```
-(where YEARMONTH is sorted by ascending order and list of temperature values are sorted by descending order)  
+(YEARMONTH are sorted by ascending order and list of temperature values are sorted by descending order)  
 
 A solution for secondary sorting involves doing multiple things. Since we know Year and Month can form a Key, we make combination of YEARMONTH as a KEY and instead of simply emitting the YEARMONTH as the key from the mapper, we need to emit a composite key, a key that has multiple parts. (Composite is a combination of key and a part of value or complete value). Now in our example, the key will be {YEARMONTH and TEMPERATURE} and value will be TEMPERATURE. If you remember, the process for a M/R Job is as follows.
 
@@ -173,7 +173,7 @@ To help you understand the map() and reduce() functions and custom plug-in class
  ---------------------------	  |					| 			|	|-------------------|  |					
  |  (201201 [5,10,35,45])  |	  |   group()		|<---------	|	|  ((200111,46),46) |  |				
  |  (200111 [40,46,47,48]) |<-----|   comparator()	|			|  	|  ((200111,47),47) |  |					
- |  (200508 [38,50,52,70]) |	  |	  reduce()| 	|			|	|  ((200111,48),48) |  |								
+ |  (200508 [38,50,52,70]) |	  |	  reduce()  	|			|	|  ((200111,48),48) |  |								
  ---------------------------	  |					|  			|	|  ((200111,40),40)	|  |							
 						          |-----------------|			|	|-------------------|  |		
                                 								|	|  ((200508,50),50) |  |		

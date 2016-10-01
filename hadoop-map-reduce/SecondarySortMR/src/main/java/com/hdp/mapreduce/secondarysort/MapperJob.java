@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.hdp.mapreduce.customwritable;
+package com.hdp.mapreduce.secondarysort;
 
 import java.net.URI;
 
@@ -17,26 +17,26 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TextOutputFormat;
 
-public class WordPairCount {
+public class MapperJob {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 
-		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/customeWritable.txt");
-		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/customwrite/result");
+		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/temperatue.txt");
+		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/temperatue/result");
 
-		JobConf job = new JobConf(conf, WordPairCount.class);
-		job.setJarByClass(WordPairCount.class);
+		JobConf job = new JobConf(conf, MapperJob.class);
+		job.setJarByClass(MapperJob.class);
 		job.setJobName("WordPairCounterJob");
 
 		FileInputFormat.setInputPaths(job, inputPath);
 		FileOutputFormat.setOutputPath(job, outputPath);
 
-		job.setOutputKeyClass(Text.class);
+		job.setOutputKeyClass(TemperatureKey.class);
 		job.setOutputValueClass(IntWritable.class);
 		job.setOutputFormat(TextOutputFormat.class);
-		job.setMapperClass(WordPairMapper.class);
-		job.setReducerClass(WordPairReducer.class);
+		job.setMapperClass(TemperatureMapper.class);
+		job.setReducerClass(TemperatureReducer.class);
 
 		FileSystem hdfs = FileSystem.get(URI.create("hdfs://127.0.0.1:9000"), conf);
 		if (hdfs.exists(outputPath))

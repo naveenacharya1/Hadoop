@@ -17,14 +17,14 @@ import org.apache.hadoop.mapred.Reporter;
  * @author Naveen
  *
  */
-public class WordPairMapper extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable> {
+public class WordPairMapper extends MapReduceBase implements Mapper<LongWritable, Text, WordPair, IntWritable> {
 
 	private Text secondWord = null;
 	private WordPair wordPair = new WordPair();
 	private static IntWritable one = new IntWritable(1);
 	private Text firstWord = new Text();
 
-	public void map(LongWritable key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter)
+	public void map(LongWritable key, Text value, OutputCollector<WordPair, IntWritable> output, Reporter reporter)
 			throws IOException {
 		try {
 			String line = value.toString();
@@ -37,7 +37,7 @@ public class WordPairMapper extends MapReduceBase implements Mapper<LongWritable
 				} else {
 					firstWord.set(word);
 					wordPair.set(secondWord,firstWord);
-					output.collect(new Text(wordPair.toString()), one);
+					output.collect(wordPair, one);
 					secondWord.set(firstWord.toString());
 				}
 
