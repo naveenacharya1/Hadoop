@@ -42,150 +42,6 @@ So, K2=YEARMONTH, and V2=TEMPERATURE, or (K2,V2) = (YEARMONTH,TEMPERATURE). Howe
 
 K2 is a composite key, but inside it, the YEARMONTH part/component is referred to as the _natural_ key. It is the key which values will be grouped by.
 
-##USE A COMPOSITE KEY COMPARATOR
-The composite key comparator is where the secondary sorting takes place. It compares composite key by YEARMONTH ascendingly and TEMPERATURE descendingly. It is shown below. Notice here we sort based on YEARMONTH and TEMPERATURE. All the components of the composite key is considered.
-
-```bash
-public class CompositeKeyComparator extends WritableComparator {
-    protected CompositeKeyComparator() {
-        super(TemperatureKey.class, true);
-    }   
-    @SuppressWarnings("rawtypes")
-    @Override
-    public int compare(WritableComparable w1, WritableComparable w2) {
-        TemperatureKey k1 = (TemperatureKey)w1;
-        TemperatureKey k2 = (TemperatureKey)w2;
-         
-        int result = k1.getYearMonth().compareTo(k2.getYearMonth());
-        if(0 == result) {
-            result = -1* k1.getTemperature().compareTo(k2.getTemperature());
-        }
-        return result;
-    }
-}
-```
-##Grouping comparator
-
-The natural key group comparator _groups_ values together according to the natural key. Without this component, each K2={YEARMONTH,TEMPERATURE} and its associated V2=TEMPERATURE may go to different reducers. Notice here, we only consider the _natural_ key.
-
-```bash
-public class NaturalKeyGroupingComparator extends WritableComparator {
-    protected NaturalKeyGroupingComparator() {
-        super(TemperatureKey.class, true);
-    }   
-    @SuppressWarnings("rawtypes")
-    @Override
-    public int compare(WritableComparable w1, WritableComparable w2) {
-        TemperatureKey k1 = (TemperatureKey)w1;
-        TemperatureKey k2 = (TemperatureKey)w2;
-         
-        return k1.getYearMonth().compareTo(k2.getYearMonth());
-    }
-}
-```
-
-##Custom partitioner
-
-In a nutshell, the partitioner decides which mapper’s output goes to which reducer based on the mapper’s output key. For this, we need two plug-in classes: a custom partitioner to control which reducer processes which keys, and a custom Comparator to sort reducer values. The custom partitioner ensures that all data with the same key (the natural key, not including the composite key with the temperature value) is sent to the same reducer. The custom Comparator does sorting so that the natural key (YEARMONTH) groups the data once it arrives at the reducer.
-
-```bash
-public class NaturalKeyPartitioner extends Partitioner<StockKey, DoubleWritable> {
- 
-    @Override
-    public int getPartition(TemperatureKey key, IntWritable val, int numPartitions) {
-        int hash = key.getYearMonth().hashCode();
-        int partition = hash % numPartitions;
-        return partition;
-    }
- 
-}
-```
-
-##THE M/R JOB
-
-Once we define the Mapper, Reducer, natural key grouping comparator, natural key partitioner, composite key comparator, and composite key, in Hadoop’s new M/R API, we may configure the Job as follows.
-
-```bash
-
-public class SsJob extends Configured implements Tool {
-    public static void main(String[] args) throws Exception {
-        ToolRunner.run(new Configuration(), new SsJob(), args);
-    }   
-    @Override
-    public int run(String[] args) throws Exception {
-        Configuration conf = getConf();
-        Job job = new Job(conf, "secondary sort");
-         
-        job.setJarByClass(SsJob.class);
-        job.setPartitionerClass(NaturalKeyPartitioner.class);
-        job.setGroupingComparatorClass(NaturalKeyGroupingComparator.class);
-        job.setSortComparatorClass(CompositeKeyComparator.class);
-         
-        job.setMapOutputKeyClass(TemperatureKey.class);
-        job.setMapOutputValueClass(IntWritable.class);
-         
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
-         
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
-         
-        job.setMapperClass(TemperatureMapper.class);
-        job.setReducerClass(TemperatureReducer.class);
-         
-        job.waitForCompletion(true);
-         
-        return 0;
-    }
-}
-```
-##Data Flow Using Plug-in Classes
-
-To help you understand the map() and reduce() functions and custom plug-in classes,below diagram illustrates the data flow for a portion of input.  
-
-```bash
-
-----------------						   ----------------------
-|  2012,01,5	|                          |  ((201201,5),5)	|
-|  2012,01,45   |                          |  ((201201,45),45)  |
-|  2012,01,35   |                          |  ((201201,35),35)  |
-|  2012,01,10   | 		-------------      |  ((201201,10),10)  |	   ------------------
-|  2001,11,46   | 		|			|      |  ((200111,46),46)  |      |				|
-|  2001,11,47   | ----->|	map()	|----> |  ((200111,47),47)  |----> |	partition()	|
-|  2001,11,48   | 		|			|      |  ((200111,48),48)  |      |				|
-|  2001,11,40   | 		-------------      |  ((200111,40),40)  |      ------------------
-|  2005,08,50   |                          |  ((200508,50),50)  |				|
-|  2005,08,52   |                          |  ((200508,52),52)  |				|
-|  2005,08,38   |                          |  ((200508,38),38)  |				|
-|  2005,08,70   |                          |  ((200508,70),70)  |				|
-----------------                           ----------------------				|
-																				|
-																				|
-																				|
-																				|
-                                												|				
-                                								---------------------------|	   
-                                								|	---------------------  |	   
-                                								|	|  ((201201,5),5)	|  |	
-                                								|	|  ((201201,45),45) |  |	
-                                								|	|  ((201201,35),35) |  |	
-                                  ------------------- 			|	|  ((201201,10),10)	|  |	
- ---------------------------	  |					| 			|	|-------------------|  |					
- |  (201201 [5,10,35,45])  |	  |   group()		|<---------	|	|  ((200111,46),46) |  |				
- |  (200111 [40,46,47,48]) |<-----|   comparator()	|			|  	|  ((200111,47),47) |  |					
- |  (200508 [38,50,52,70]) |	  |	  reduce()  	|			|	|  ((200111,48),48) |  |								
- ---------------------------	  |					|  			|	|  ((200111,40),40)	|  |							
-						          |-----------------|			|	|-------------------|  |		
-                                								|	|  ((200508,50),50) |  |		
-                                								|	|  ((200508,52),52) |  |		
-						        								|	|  ((200508,38),38) |  |		
-						        								|	|  ((200508,70),70) |  |		
-					            								|	---------------------  |		
-					            								----------------------------																		
-                                                        
-                                                        
-```
-
 Lets try to write a program without using secondary sort and check the reducer output.  
 
 TemperatureKey.java
@@ -380,5 +236,153 @@ part-r-00000
 200508	[70,38,52,50]
 201201	[10,35,45,5]
 ```
+
+Modified program using secondary sort
+
+##Composite Key Comparator
+The composite key comparator is where the secondary sorting takes place. It compares composite key by YEARMONTH ascendingly and TEMPERATURE descendingly. It is shown below. Notice here we sort based on YEARMONTH and TEMPERATURE. All the components of the composite key is considered.
+
+```bash
+public class CompositeKeyComparator extends WritableComparator {
+    protected CompositeKeyComparator() {
+        super(TemperatureKey.class, true);
+    }   
+    @SuppressWarnings("rawtypes")
+    @Override
+    public int compare(WritableComparable w1, WritableComparable w2) {
+        TemperatureKey k1 = (TemperatureKey)w1;
+        TemperatureKey k2 = (TemperatureKey)w2;
+         
+        int result = k1.getYearMonth().compareTo(k2.getYearMonth());
+        if(0 == result) {
+            result = -1* k1.getTemperature().compareTo(k2.getTemperature());
+        }
+        return result;
+    }
+}
+```
+##Grouping comparator
+
+The natural key group comparator _groups_ values together according to the natural key. Without this component, each K2={YEARMONTH,TEMPERATURE} and its associated V2=TEMPERATURE may go to different reducers. Notice here, we only consider the _natural_ key.
+
+```bash
+public class NaturalKeyGroupingComparator extends WritableComparator {
+    protected NaturalKeyGroupingComparator() {
+        super(TemperatureKey.class, true);
+    }   
+    @SuppressWarnings("rawtypes")
+    @Override
+    public int compare(WritableComparable w1, WritableComparable w2) {
+        TemperatureKey k1 = (TemperatureKey)w1;
+        TemperatureKey k2 = (TemperatureKey)w2;
+         
+        return k1.getYearMonth().compareTo(k2.getYearMonth());
+    }
+}
+```
+
+##Custom partitioner
+
+In a nutshell, the partitioner decides which mapper’s output goes to which reducer based on the mapper’s output key. For this, we need two plug-in classes: a custom partitioner to control which reducer processes which keys, and a custom Comparator to sort reducer values. The custom partitioner ensures that all data with the same key (the natural key, not including the composite key with the temperature value) is sent to the same reducer. The custom Comparator does sorting so that the natural key (YEARMONTH) groups the data once it arrives at the reducer.
+
+```bash
+public class NaturalKeyPartitioner extends Partitioner<StockKey, DoubleWritable> {
+ 
+    @Override
+    public int getPartition(TemperatureKey key, IntWritable val, int numPartitions) {
+        int hash = key.getYearMonth().hashCode();
+        int partition = hash % numPartitions;
+        return partition;
+    }
+ 
+}
+```
+
+##THE M/R JOB
+
+Once we define the Mapper, Reducer, natural key grouping comparator, natural key partitioner, composite key comparator, and composite key, in Hadoop’s new M/R API, we may configure the Job as follows.
+
+```bash
+
+public class SsJob extends Configured implements Tool {
+    public static void main(String[] args) throws Exception {
+        ToolRunner.run(new Configuration(), new SsJob(), args);
+    }   
+    @Override
+    public int run(String[] args) throws Exception {
+        Configuration conf = getConf();
+        Job job = new Job(conf, "secondary sort");
+         
+        job.setJarByClass(SsJob.class);
+        job.setPartitionerClass(NaturalKeyPartitioner.class);
+        job.setGroupingComparatorClass(NaturalKeyGroupingComparator.class);
+        job.setSortComparatorClass(CompositeKeyComparator.class);
+         
+        job.setMapOutputKeyClass(TemperatureKey.class);
+        job.setMapOutputValueClass(IntWritable.class);
+         
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(Text.class);
+         
+        job.setInputFormatClass(TextInputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
+         
+        job.setMapperClass(TemperatureMapper.class);
+        job.setReducerClass(TemperatureReducer.class);
+         
+        job.waitForCompletion(true);
+         
+        return 0;
+    }
+}
+```
+##Data Flow Using Plug-in Classes
+
+To help you understand the map() and reduce() functions and custom plug-in classes,below diagram illustrates the data flow for a portion of input.  
+
+```bash
+
+----------------						   ----------------------
+|  2012,01,5	|                          |  ((201201,5),5)	|
+|  2012,01,45   |                          |  ((201201,45),45)  |
+|  2012,01,35   |                          |  ((201201,35),35)  |
+|  2012,01,10   | 		-------------      |  ((201201,10),10)  |	   ------------------
+|  2001,11,46   | 		|			|      |  ((200111,46),46)  |      |				|
+|  2001,11,47   | ----->|	map()	|----> |  ((200111,47),47)  |----> |	partition()	|
+|  2001,11,48   | 		|			|      |  ((200111,48),48)  |      |				|
+|  2001,11,40   | 		-------------      |  ((200111,40),40)  |      ------------------
+|  2005,08,50   |                          |  ((200508,50),50)  |				|
+|  2005,08,52   |                          |  ((200508,52),52)  |				|
+|  2005,08,38   |                          |  ((200508,38),38)  |				|
+|  2005,08,70   |                          |  ((200508,70),70)  |				|
+----------------                           ----------------------				|
+																				|
+																				|
+																				|
+																				|
+                                												|				
+                                								---------------------------|	   
+                                								|	---------------------  |	   
+                                								|	|  ((201201,5),5)	|  |	
+                                								|	|  ((201201,45),45) |  |	
+                                								|	|  ((201201,35),35) |  |	
+                                  ------------------- 			|	|  ((201201,10),10)	|  |	
+ ---------------------------	  |					| 			|	|-------------------|  |					
+ |  (201201 [5,10,35,45])  |	  |   group()		|<---------	|	|  ((200111,46),46) |  |				
+ |  (200111 [40,46,47,48]) |<-----|   comparator()	|			|  	|  ((200111,47),47) |  |					
+ |  (200508 [38,50,52,70]) |	  |	  reduce()  	|			|	|  ((200111,48),48) |  |								
+ ---------------------------	  |					|  			|	|  ((200111,40),40)	|  |							
+						          |-----------------|			|	|-------------------|  |		
+                                								|	|  ((200508,50),50) |  |		
+                                								|	|  ((200508,52),52) |  |		
+						        								|	|  ((200508,38),38) |  |		
+						        								|	|  ((200508,70),70) |  |		
+					            								|	---------------------  |		
+					            								----------------------------																		
+                                                        
+                                                        
+```
+
+
 
 Sample input/result files are provided in the project under resources/input, resources/output
