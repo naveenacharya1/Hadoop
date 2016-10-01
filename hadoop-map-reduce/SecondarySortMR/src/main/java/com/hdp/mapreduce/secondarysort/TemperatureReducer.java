@@ -25,7 +25,8 @@ public class TemperatureReducer extends MapReduceBase
 			stringBuffer.setLength(0);
 			stringBuffer.append(str);
 			stringBuffer.append("]");
-			output.collect(key.getTemperature(), new Text(stringBuffer.toString()));
+			output.collect(key.getYearMonth(), new Text(stringBuffer.toString()));
+			System.out.println("Reducer Value Output :"+stringBuffer);
 			stringBuffer.setLength(0);
 		} catch (Exception e) {
 			e.printStackTrace();

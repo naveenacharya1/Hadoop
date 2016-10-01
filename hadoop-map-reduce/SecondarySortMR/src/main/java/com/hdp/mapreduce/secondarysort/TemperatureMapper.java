@@ -23,6 +23,7 @@ public class TemperatureMapper extends MapReduceBase
 			temperatureKey.set(new IntWritable(Integer.valueOf(keyData)),
 					new IntWritable(Integer.valueOf(tempData[2])));
 			output.collect(temperatureKey, new IntWritable(Integer.valueOf(tempData[2])));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -28,6 +28,10 @@ public class MapperJob {
 		FileInputFormat.setInputPaths(job, inputPath);
 		FileOutputFormat.setOutputPath(job, outputPath);
 
+		job.setPartitionerClass(NaturalKeyPartitioner.class);
+		job.setOutputValueGroupingComparator(NaturalKeyGroupingComparator.class);
+		job.setOutputKeyComparatorClass(CompositeKeyComparator.class);
+
 		job.setOutputKeyClass(TemperatureKey.class);
 		job.setOutputValueClass(IntWritable.class);
 		job.setOutputFormat(TextOutputFormat.class);

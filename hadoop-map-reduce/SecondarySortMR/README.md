@@ -166,7 +166,7 @@ public class TemperatureReducer extends MapReduceBase
 			stringBuffer.setLength(0);
 			stringBuffer.append(str);
 			stringBuffer.append("]");
-			output.collect(key.getTemperature(), new Text(stringBuffer.toString()));
+			output.collect(key.getYearMonth(), new Text(stringBuffer.toString()));
 			stringBuffer.setLength(0);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -206,7 +206,7 @@ public class MapperJob {
 
 		JobConf job = new JobConf(conf, MapperJob.class);
 		job.setJarByClass(MapperJob.class);
-		job.setJobName("WordPairCounterJob");
+		job.setJobName("SecSortJob");
 
 		FileInputFormat.setInputPaths(job, inputPath);
 		FileOutputFormat.setOutputPath(job, outputPath);
@@ -237,48 +237,77 @@ part-r-00000
 201201	[10,35,45,5]
 ```
 
-Modified program using secondary sort
+Lets modify program to perform secondary sort
 
 ##Composite Key Comparator
 The composite key comparator is where the secondary sorting takes place. It compares composite key by YEARMONTH ascendingly and TEMPERATURE descendingly. It is shown below. Notice here we sort based on YEARMONTH and TEMPERATURE. All the components of the composite key is considered.
 
 ```bash
+/**
+ * 
+ */
+package com.hdp.mapreduce.secondarysort;
+
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
+
+/**
+ * @author Naveen
+ *
+ */
 public class CompositeKeyComparator extends WritableComparator {
-    protected CompositeKeyComparator() {
-        super(TemperatureKey.class, true);
-    }   
-    @SuppressWarnings("rawtypes")
-    @Override
-    public int compare(WritableComparable w1, WritableComparable w2) {
-        TemperatureKey k1 = (TemperatureKey)w1;
-        TemperatureKey k2 = (TemperatureKey)w2;
-         
-        int result = k1.getYearMonth().compareTo(k2.getYearMonth());
-        if(0 == result) {
-            result = -1* k1.getTemperature().compareTo(k2.getTemperature());
-        }
-        return result;
-    }
+
+	protected CompositeKeyComparator() {
+		super(TemperatureKey.class, true);
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public int compare(WritableComparable w1, WritableComparable w2) {
+		TemperatureKey k1 = (TemperatureKey) w1;
+		TemperatureKey k2 = (TemperatureKey) w2;
+
+		int result = k1.getYearMonth().compareTo(k2.getYearMonth());
+		if (0 == result) {
+			result = -1 * k1.getTemperature().compareTo(k2.getTemperature());
+		}
+		return result;
+	}
 }
+
 ```
 ##Grouping comparator
 
 The natural key group comparator _groups_ values together according to the natural key. Without this component, each K2={YEARMONTH,TEMPERATURE} and its associated V2=TEMPERATURE may go to different reducers. Notice here, we only consider the _natural_ key.
 
 ```bash
+/**
+ * 
+ */
+package com.hdp.mapreduce.secondarysort;
+
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
+
+
+/**
+ * @author Naveen
+ *
+ */
 public class NaturalKeyGroupingComparator extends WritableComparator {
-    protected NaturalKeyGroupingComparator() {
-        super(TemperatureKey.class, true);
-    }   
-    @SuppressWarnings("rawtypes")
-    @Override
-    public int compare(WritableComparable w1, WritableComparable w2) {
-        TemperatureKey k1 = (TemperatureKey)w1;
-        TemperatureKey k2 = (TemperatureKey)w2;
-         
-        return k1.getYearMonth().compareTo(k2.getYearMonth());
-    }
+	protected NaturalKeyGroupingComparator() {
+		super(TemperatureKey.class, true);
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public int compare(WritableComparable w1, WritableComparable w2) {
+		TemperatureKey k1 = (TemperatureKey) w1;
+		TemperatureKey k2 = (TemperatureKey) w2;
+		return k1.getYearMonth().compareTo(k2.getYearMonth());
+	}
 }
+
 ```
 
 ##Custom partitioner
@@ -286,16 +315,29 @@ public class NaturalKeyGroupingComparator extends WritableComparator {
 In a nutshell, the partitioner decides which mapper’s output goes to which reducer based on the mapper’s output key. For this, we need two plug-in classes: a custom partitioner to control which reducer processes which keys, and a custom Comparator to sort reducer values. The custom partitioner ensures that all data with the same key (the natural key, not including the composite key with the temperature value) is sent to the same reducer. The custom Comparator does sorting so that the natural key (YEARMONTH) groups the data once it arrives at the reducer.
 
 ```bash
-public class NaturalKeyPartitioner extends Partitioner<StockKey, DoubleWritable> {
- 
-    @Override
-    public int getPartition(TemperatureKey key, IntWritable val, int numPartitions) {
-        int hash = key.getYearMonth().hashCode();
-        int partition = hash % numPartitions;
-        return partition;
-    }
- 
+/**
+ * 
+ */
+package com.hdp.mapreduce.secondarysort;
+
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Partitioner;
+
+/**
+ * @author Naveen
+ *
+ */
+public class NaturalKeyPartitioner extends MapReduceBase implements Partitioner<TemperatureKey, IntWritable> {
+
+	public int getPartition(TemperatureKey key, IntWritable value, int numPartitions) {
+
+		int hash = key.getYearMonth().hashCode();
+		int partition = hash % numPartitions;
+		return partition;
+	}
 }
+
 ```
 
 ##THE M/R JOB
@@ -304,38 +346,65 @@ Once we define the Mapper, Reducer, natural key grouping comparator, natural key
 
 ```bash
 
-public class SsJob extends Configured implements Tool {
-    public static void main(String[] args) throws Exception {
-        ToolRunner.run(new Configuration(), new SsJob(), args);
-    }   
-    @Override
-    public int run(String[] args) throws Exception {
-        Configuration conf = getConf();
-        Job job = new Job(conf, "secondary sort");
-         
-        job.setJarByClass(SsJob.class);
-        job.setPartitionerClass(NaturalKeyPartitioner.class);
-        job.setGroupingComparatorClass(NaturalKeyGroupingComparator.class);
-        job.setSortComparatorClass(CompositeKeyComparator.class);
-         
-        job.setMapOutputKeyClass(TemperatureKey.class);
-        job.setMapOutputValueClass(IntWritable.class);
-         
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
-         
-        job.setInputFormatClass(TextInputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
-         
-        job.setMapperClass(TemperatureMapper.class);
-        job.setReducerClass(TemperatureReducer.class);
-         
-        job.waitForCompletion(true);
-         
-        return 0;
-    }
+package com.hdp.mapreduce.secondarysort;
+
+import java.net.URI;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapred.TextOutputFormat;
+
+public class MapperJob {
+
+	public static void main(String[] args) throws Exception {
+		Configuration conf = new Configuration();
+
+		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/temperatue.txt");
+		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/temperatue/result");
+
+		JobConf job = new JobConf(conf, MapperJob.class);
+		job.setJarByClass(MapperJob.class);
+		job.setJobName("SecSortJob");
+
+		FileInputFormat.setInputPaths(job, inputPath);
+		FileOutputFormat.setOutputPath(job, outputPath);
+		
+		job.setPartitionerClass(NaturalKeyPartitioner.class);
+		job.setOutputValueGroupingComparator(NaturalKeyGroupingComparator.class);
+		job.setOutputKeyComparatorClass(CompositeKeyComparator.class);
+
+		job.setOutputKeyClass(TemperatureKey.class);
+		job.setOutputValueClass(IntWritable.class);
+		job.setOutputFormat(TextOutputFormat.class);
+		job.setMapperClass(TemperatureMapper.class);
+		job.setReducerClass(TemperatureReducer.class);
+
+		FileSystem hdfs = FileSystem.get(URI.create("hdfs://127.0.0.1:9000"), conf);
+		if (hdfs.exists(outputPath))
+			hdfs.delete(outputPath, true);
+
+		RunningJob runningJob = JobClient.runJob(job);
+		System.out.println("Job Successfull: " + runningJob.isComplete());
+	}
+
 }
+
 ```
+
+part-r-00000
+```bash
+200111	[48,47,46,40]
+200508	[70,52,50,38]
+201201	[45,35,10,5]
+```
+
 ##Data Flow Using Plug-in Classes
 
 To help you understand the map() and reduce() functions and custom plug-in classes,below diagram illustrates the data flow for a portion of input.  
