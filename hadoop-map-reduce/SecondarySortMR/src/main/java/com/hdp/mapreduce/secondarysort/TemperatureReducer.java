@@ -11,10 +11,10 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
 public class TemperatureReducer extends MapReduceBase
-		implements Reducer<TemperatureKey, IntWritable, TemperatureKey, Text> {
+		implements Reducer<TemperatureKey, IntWritable, IntWritable, Text> {
 	StringBuffer stringBuffer = new StringBuffer();
 
-	public void reduce(TemperatureKey key, Iterator<IntWritable> values, OutputCollector<TemperatureKey, Text> output,
+	public void reduce(TemperatureKey key, Iterator<IntWritable> values, OutputCollector<IntWritable, Text> output,
 			Reporter reporter) throws IOException {
 		try {
 			stringBuffer.append("[");
@@ -25,7 +25,7 @@ public class TemperatureReducer extends MapReduceBase
 			stringBuffer.setLength(0);
 			stringBuffer.append(str);
 			stringBuffer.append("]");
-			output.collect(key, new Text(stringBuffer.toString()));
+			output.collect(key.getTemperature(), new Text(stringBuffer.toString()));
 			stringBuffer.setLength(0);
 		} catch (Exception e) {
 			e.printStackTrace();

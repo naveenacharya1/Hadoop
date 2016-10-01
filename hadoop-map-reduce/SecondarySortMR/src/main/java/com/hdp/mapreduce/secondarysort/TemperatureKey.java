@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.hdp.mapreduce.secondarysort;
 
 import java.io.DataInput;
@@ -10,10 +7,6 @@ import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.WritableComparable;
 
-/**
- * @author Naveen
- *
- */
 public class TemperatureKey implements WritableComparable<TemperatureKey> {
 
 	private IntWritable yearMonth;
@@ -47,9 +40,12 @@ public class TemperatureKey implements WritableComparable<TemperatureKey> {
 		return yearMonth.compareTo(o.yearMonth);
 	}
 
-	@Override
-	public String toString() {
-		return yearMonth.toString();
+	public IntWritable getYearMonth() {
+		return yearMonth;
+	}
+
+	public IntWritable getTemperature() {
+		return temperature;
 	}
 
 }
