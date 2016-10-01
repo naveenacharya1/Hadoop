@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.hdp.mapreduce.secondarysort;
 
 import java.io.IOException;
@@ -13,10 +10,6 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 
-/**
- * @author Naveen
- *
- */
 public class TemperatureReducer extends MapReduceBase
 		implements Reducer<TemperatureKey, IntWritable, TemperatureKey, Text> {
 	StringBuffer stringBuffer = new StringBuffer();

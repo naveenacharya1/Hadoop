@@ -186,6 +186,192 @@ To help you understand the map() and reduce() functions and custom plug-in class
                                                         
 ```
 
+Lets try to write a program without using secondary sort and check the reducer output.  
 
+TemperatureKey.java
+
+```bash
+package com.hdp.mapreduce.secondarysort;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.WritableComparable;
+
+public class TemperatureKey implements WritableComparable<TemperatureKey> {
+
+	private IntWritable yearMonth;
+	private IntWritable temperature;
+
+	public TemperatureKey() {
+		set(new IntWritable(), new IntWritable());
+	}
+
+	public void set(IntWritable yearMonth, IntWritable temperature) {
+		this.yearMonth = yearMonth;
+		this.temperature = temperature;
+
+	}
+
+	public TemperatureKey(IntWritable yearMonth, IntWritable temperature) {
+		set(yearMonth, temperature);
+	}
+
+	public void write(DataOutput out) throws IOException {
+		yearMonth.write(out);
+		temperature.write(out);
+	}
+
+	public void readFields(DataInput in) throws IOException {
+		yearMonth.readFields(in);
+		temperature.readFields(in);
+	}
+
+	public int compareTo(TemperatureKey o) {
+		return yearMonth.compareTo(o.yearMonth);
+	}
+
+	@Override
+	public String toString() {
+		return yearMonth.toString();
+	}
+
+}
+```
+TemperatureMapper.java
+
+```bash
+package com.hdp.mapreduce.secondarysort;
+
+import java.io.IOException;
+
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reporter;
+
+public class TemperatureMapper extends MapReduceBase
+		implements Mapper<LongWritable, Text, TemperatureKey, IntWritable> {
+
+	public void map(LongWritable key, Text value, OutputCollector<TemperatureKey, IntWritable> output,
+			Reporter reporter) throws IOException {
+
+		try {
+			String[] tempData = value.toString().split(",");
+			TemperatureKey temperatureKey = new TemperatureKey();
+			String keyData = tempData[0] + tempData[1];
+			temperatureKey.set(new IntWritable(Integer.valueOf(keyData)),
+					new IntWritable(Integer.valueOf(tempData[2])));
+			output.collect(temperatureKey, new IntWritable(Integer.valueOf(tempData[2])));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+}
+
+```
+TemperatureReducer.java
+
+```bash
+package com.hdp.mapreduce.secondarysort;
+
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
+
+public class TemperatureReducer extends MapReduceBase
+		implements Reducer<TemperatureKey, IntWritable, TemperatureKey, Text> {
+	StringBuffer stringBuffer = new StringBuffer();
+
+	public void reduce(TemperatureKey key, Iterator<IntWritable> values, OutputCollector<TemperatureKey, Text> output,
+			Reporter reporter) throws IOException {
+		try {
+			stringBuffer.append("[");
+			while (values.hasNext()) {
+				stringBuffer.append(values.next()).append(",");
+			}
+			String str = stringBuffer.toString().substring(0, stringBuffer.toString().length() - 1);
+			stringBuffer.setLength(0);
+			stringBuffer.append(str);
+			stringBuffer.append("]");
+			output.collect(key, new Text(stringBuffer.toString()));
+			stringBuffer.setLength(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+}
+```
+
+MapperJob.java
+
+```bash
+package com.hdp.mapreduce.secondarysort;
+
+import java.net.URI;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapred.TextOutputFormat;
+
+public class MapperJob {
+
+	public static void main(String[] args) throws Exception {
+		Configuration conf = new Configuration();
+
+		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/temperatue.txt");
+		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/temperatue/result");
+
+		JobConf job = new JobConf(conf, MapperJob.class);
+		job.setJarByClass(MapperJob.class);
+		job.setJobName("WordPairCounterJob");
+
+		FileInputFormat.setInputPaths(job, inputPath);
+		FileOutputFormat.setOutputPath(job, outputPath);
+
+		job.setOutputKeyClass(TemperatureKey.class);
+		job.setOutputValueClass(IntWritable.class);
+		job.setOutputFormat(TextOutputFormat.class);
+		job.setMapperClass(TemperatureMapper.class);
+		job.setReducerClass(TemperatureReducer.class);
+
+		FileSystem hdfs = FileSystem.get(URI.create("hdfs://127.0.0.1:9000"), conf);
+		if (hdfs.exists(outputPath))
+			hdfs.delete(outputPath, true);
+
+		RunningJob runningJob = JobClient.runJob(job);
+		System.out.println("Job Successfull: " + runningJob.isComplete());
+	}
+
+}
+
+```
+
+part-r-00000
+```bash
+200111	[40,48,47,46]
+200508	[70,38,52,50]
+201201	[10,35,45,5]
+```
 
 Sample input/result files are provided in the project under resources/input, resources/output
