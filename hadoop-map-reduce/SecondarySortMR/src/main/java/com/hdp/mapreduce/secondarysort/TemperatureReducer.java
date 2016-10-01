@@ -17,16 +17,15 @@ public class TemperatureReducer extends MapReduceBase
 	public void reduce(TemperatureKey key, Iterator<IntWritable> values, OutputCollector<IntWritable, Text> output,
 			Reporter reporter) throws IOException {
 		try {
+
 			stringBuffer.append("[");
 			while (values.hasNext()) {
 				stringBuffer.append(values.next()).append(",");
 			}
-			String str = stringBuffer.toString().substring(0, stringBuffer.toString().length() - 1);
-			stringBuffer.setLength(0);
-			stringBuffer.append(str);
+			stringBuffer.setLength(stringBuffer.length() - 1);
 			stringBuffer.append("]");
 			output.collect(key.getYearMonth(), new Text(stringBuffer.toString()));
-			System.out.println("Reducer Value Output :"+stringBuffer);
+			System.out.println("Reducer Value Output :" + stringBuffer);
 			stringBuffer.setLength(0);
 		} catch (Exception e) {
 			e.printStackTrace();

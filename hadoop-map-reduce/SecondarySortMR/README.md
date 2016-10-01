@@ -162,11 +162,10 @@ public class TemperatureReducer extends MapReduceBase
 			while (values.hasNext()) {
 				stringBuffer.append(values.next()).append(",");
 			}
-			String str = stringBuffer.toString().substring(0, stringBuffer.toString().length() - 1);
-			stringBuffer.setLength(0);
-			stringBuffer.append(str);
+			stringBuffer.setLength(stringBuffer.length() - 1);
 			stringBuffer.append("]");
 			output.collect(key.getYearMonth(), new Text(stringBuffer.toString()));
+			System.out.println("Reducer Value Output :" + stringBuffer);
 			stringBuffer.setLength(0);
 		} catch (Exception e) {
 			e.printStackTrace();
