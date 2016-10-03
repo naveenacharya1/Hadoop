@@ -110,16 +110,11 @@ import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 
-public class TemperatureMapper extends MapReduceBase
-		implements Mapper<LongWritable, Text, TemperatureKey, IntWritable> {
+public class TemperatureMapper extends Mapper<LongWritable, Text, TemperatureKey, IntWritable> {
 
-	public void map(LongWritable key, Text value, OutputCollector<TemperatureKey, IntWritable> output,
-			Reporter reporter) throws IOException {
+	public void map(LongWritable key, Text value, Context context) throws IOException {
 
 		try {
 			String[] tempData = value.toString().split(",");
@@ -127,13 +122,15 @@ public class TemperatureMapper extends MapReduceBase
 			String keyData = tempData[0] + tempData[1];
 			temperatureKey.set(new IntWritable(Integer.valueOf(keyData)),
 					new IntWritable(Integer.valueOf(tempData[2])));
-			output.collect(temperatureKey, new IntWritable(Integer.valueOf(tempData[2])));
+			context.write(temperatureKey, new IntWritable(Integer.valueOf(tempData[2])));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
 }
+
 
 ```
 TemperatureReducer.java
@@ -146,25 +143,23 @@ import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
-public class TemperatureReducer extends MapReduceBase
-		implements Reducer<TemperatureKey, IntWritable, IntWritable, Text> {
+public class TemperatureReducer extends Reducer<TemperatureKey, IntWritable, IntWritable, Text> {
 	StringBuffer stringBuffer = new StringBuffer();
 
-	public void reduce(TemperatureKey key, Iterator<IntWritable> values, OutputCollector<IntWritable, Text> output,
-			Reporter reporter) throws IOException {
+	public void reduce(TemperatureKey key, Iterable<IntWritable> values, Context context) throws IOException {
 		try {
+
 			stringBuffer.append("[");
-			while (values.hasNext()) {
-				stringBuffer.append(values.next()).append(",");
+
+			Iterator<IntWritable> valuesIt = values.iterator();
+			while (valuesIt.hasNext()) {
+				stringBuffer.append(valuesIt.next()).append(",");
 			}
 			stringBuffer.setLength(stringBuffer.length() - 1);
 			stringBuffer.append("]");
-			output.collect(key.getYearMonth(), new Text(stringBuffer.toString()));
+			context.write(key.getYearMonth(), new Text(stringBuffer.toString()));
 			System.out.println("Reducer Value Output :" + stringBuffer);
 			stringBuffer.setLength(0);
 		} catch (Exception e) {
@@ -173,6 +168,7 @@ public class TemperatureReducer extends MapReduceBase
 	}
 
 }
+
 
 ```
 
@@ -188,12 +184,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class MapperJob {
 
@@ -203,16 +197,16 @@ public class MapperJob {
 		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/temperatue.txt");
 		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/temperatue/result");
 
-		JobConf job = new JobConf(conf, MapperJob.class);
+		Job job = Job.getInstance();
 		job.setJarByClass(MapperJob.class);
-		job.setJobName("SecSortJob");
+		job.setJobName("WordPairCounterJob");
 
 		FileInputFormat.setInputPaths(job, inputPath);
 		FileOutputFormat.setOutputPath(job, outputPath);
-
+		
 		job.setOutputKeyClass(TemperatureKey.class);
 		job.setOutputValueClass(IntWritable.class);
-		job.setOutputFormat(TextOutputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
 		job.setMapperClass(TemperatureMapper.class);
 		job.setReducerClass(TemperatureReducer.class);
 
@@ -220,8 +214,9 @@ public class MapperJob {
 		if (hdfs.exists(outputPath))
 			hdfs.delete(outputPath, true);
 
-		RunningJob runningJob = JobClient.runJob(job);
-		System.out.println("Job Successfull: " + runningJob.isComplete());
+		int returnValue = job.waitForCompletion(true) ? 0 : 1;
+		System.out.println("job.isSuccessful " + job.isSuccessful());
+		System.exit(returnValue);
 	}
 
 }
@@ -353,12 +348,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class MapperJob {
 
@@ -368,20 +361,20 @@ public class MapperJob {
 		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/temperatue.txt");
 		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/temperatue/result");
 
-		JobConf job = new JobConf(conf, MapperJob.class);
+		Job job = Job.getInstance();
 		job.setJarByClass(MapperJob.class);
-		job.setJobName("SecSortJob");
+		job.setJobName("WordPairCounterJob");
 
 		FileInputFormat.setInputPaths(job, inputPath);
 		FileOutputFormat.setOutputPath(job, outputPath);
-		
-		job.setPartitionerClass(NaturalKeyPartitioner.class);
-		job.setOutputValueGroupingComparator(NaturalKeyGroupingComparator.class);
-		job.setOutputKeyComparatorClass(CompositeKeyComparator.class);
 
+		job.setPartitionerClass(NaturalKeyPartitioner.class);
+		job.setGroupingComparatorClass(NaturalKeyGroupingComparator.class);
+		job.setSortComparatorClass(CompositeKeyComparator.class);
+		
 		job.setOutputKeyClass(TemperatureKey.class);
 		job.setOutputValueClass(IntWritable.class);
-		job.setOutputFormat(TextOutputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
 		job.setMapperClass(TemperatureMapper.class);
 		job.setReducerClass(TemperatureReducer.class);
 
@@ -389,8 +382,9 @@ public class MapperJob {
 		if (hdfs.exists(outputPath))
 			hdfs.delete(outputPath, true);
 
-		RunningJob runningJob = JobClient.runJob(job);
-		System.out.println("Job Successfull: " + runningJob.isComplete());
+		int returnValue = job.waitForCompletion(true) ? 0 : 1;
+		System.out.println("job.isSuccessful " + job.isSuccessful());
+		System.exit(returnValue);
 	}
 
 }
