@@ -23,8 +23,7 @@ public class WordCountJob {
 		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/wordcount.txt");
 		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/combiner/result");
 
-		@SuppressWarnings("deprecation")
-		Job job = new Job();
+		Job job = Job.getInstance();
 		job.setJarByClass(WordCountJob.class);
 		job.setJobName("WordCounterJob");
 

@@ -3,30 +3,24 @@
  */
 package com.hdp.madreduce.example;
 
-/**
- * @author Naveen
- *
- */
 import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;;
 
-public class WordCountReducer extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {
+public class WordCountReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
-	public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> outputCollector,
-			Reporter reporter) throws IOException {
+	public void reduce(Text key, Iterable<IntWritable> values, Context context)
+			throws IOException, InterruptedException {
 		int sum = 0;
 
-		while (values.hasNext()) {
-			sum = sum + values.next().get();
+		Iterator<IntWritable> valuesIt = values.iterator();
+		while (valuesIt.hasNext()) {
+			sum = sum + valuesIt.next().get();
 		}
-		outputCollector.collect(key, new IntWritable(sum));
+		context.write(key, new IntWritable(sum));
 
 	}
 }

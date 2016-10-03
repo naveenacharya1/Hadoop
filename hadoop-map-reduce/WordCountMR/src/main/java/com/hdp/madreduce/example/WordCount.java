@@ -10,12 +10,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.FileInputFormat;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapred.TextOutputFormat;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class WordCount {
 
@@ -25,7 +23,7 @@ public class WordCount {
 		Path inputPath = new Path("hdfs://127.0.0.1:9000/input/WordCountSample.txt");
 		Path outputPath = new Path("hdfs://127.0.0.1:9000/output/result");
 
-		JobConf job = new JobConf(conf, WordCount.class);
+		Job job = Job.getInstance();
 		job.setJarByClass(WordCount.class);
 		job.setJobName("WordCounterJob");
 
@@ -34,7 +32,7 @@ public class WordCount {
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
-		job.setOutputFormat(TextOutputFormat.class);
+		job.setOutputFormatClass(TextOutputFormat.class);
 		job.setMapperClass(WordCountMapper.class);
 		job.setReducerClass(WordCountReducer.class);
 
@@ -42,8 +40,9 @@ public class WordCount {
 		if (hdfs.exists(outputPath))
 			hdfs.delete(outputPath, true);
 
-		RunningJob runningJob = JobClient.runJob(job);
-		System.out.println("Job Successfull: " + runningJob.isComplete());
+		int returnValue = job.waitForCompletion(true) ? 0 : 1;
+		System.out.println("job.isSuccessful " + job.isSuccessful());
+		System.exit(returnValue);
 	}
 
 }

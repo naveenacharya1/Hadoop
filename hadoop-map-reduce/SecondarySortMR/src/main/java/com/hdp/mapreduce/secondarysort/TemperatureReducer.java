@@ -5,26 +5,23 @@ import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
-public class TemperatureReducer extends MapReduceBase
-		implements Reducer<TemperatureKey, IntWritable, IntWritable, Text> {
+public class TemperatureReducer extends Reducer<TemperatureKey, IntWritable, IntWritable, Text> {
 	StringBuffer stringBuffer = new StringBuffer();
 
-	public void reduce(TemperatureKey key, Iterator<IntWritable> values, OutputCollector<IntWritable, Text> output,
-			Reporter reporter) throws IOException {
+	public void reduce(TemperatureKey key, Iterable<IntWritable> values, Context context) throws IOException {
 		try {
 
 			stringBuffer.append("[");
-			while (values.hasNext()) {
-				stringBuffer.append(values.next()).append(",");
+
+			Iterator<IntWritable> valuesIt = values.iterator();
+			while (valuesIt.hasNext()) {
+				stringBuffer.append(valuesIt.next()).append(",");
 			}
 			stringBuffer.setLength(stringBuffer.length() - 1);
 			stringBuffer.append("]");
-			output.collect(key.getYearMonth(), new Text(stringBuffer.toString()));
+			context.write(key.getYearMonth(), new Text(stringBuffer.toString()));
 			System.out.println("Reducer Value Output :" + stringBuffer);
 			stringBuffer.setLength(0);
 		} catch (Exception e) {

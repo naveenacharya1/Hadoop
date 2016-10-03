@@ -7,24 +7,22 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Reducer;
 
 /**
  * @author Naveen
  *
  */
-public class WordPairReducer extends MapReduceBase implements Reducer<WordPair, IntWritable, WordPair, IntWritable> {
+public class WordPairReducer extends Reducer<WordPair, IntWritable, WordPair, IntWritable> {
 
-	public void reduce(WordPair key, Iterator<IntWritable> values, OutputCollector<WordPair, IntWritable> output,
-			Reporter reporter) throws IOException {
+	public void reduce(WordPair key, Iterable<IntWritable> values, Context context)
+			throws IOException, InterruptedException {
 		int sum = 0;
-		while (values.hasNext()) {
-			sum = sum + values.next().get();
+		Iterator<IntWritable> valuesIt = values.iterator();
+		while (valuesIt.hasNext()) {
+			sum = sum + valuesIt.next().get();
 		}
-		output.collect(key, new IntWritable(sum));
+		context.write(key, new IntWritable(sum));
 	}
 
 }

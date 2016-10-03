@@ -1,12 +1,5 @@
-/**
- * 
- */
 package com.hdp.madreduce.example;
 
-/**
- * @author Naveen
- *
- */
 import java.io.IOException;
 import java.util.Iterator;
 
