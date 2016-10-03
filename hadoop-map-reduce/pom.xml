@@ -16,5 +16,7 @@
     <module>DistributedcacheMR</module>
     <module>CustomWritableMR</module>
     <module>SecondarySortMR</module>
+    <module>MapSideJoinMR</module>
+    <module>ReduceSideJoinMR</module>
   </modules>
 </project>
