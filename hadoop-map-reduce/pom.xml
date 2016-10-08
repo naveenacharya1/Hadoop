@@ -18,5 +18,6 @@
     <module>SecondarySortMR</module>
     <module>MapSideJoinMR</module>
     <module>ReduceSideJoinMR</module>
+    <module>you-tube-assignment</module>
   </modules>
 </project>
