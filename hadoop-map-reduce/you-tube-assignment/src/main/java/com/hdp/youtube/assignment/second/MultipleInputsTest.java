@@ -68,7 +68,6 @@ public class MultipleInputsTest {
 			this.value = val;
 		}
 
-		@Override
 		public void readFields(DataInput in) throws IOException {
 			if (null == in) {
 				throw new IllegalArgumentException("in cannot be null");
@@ -78,7 +77,6 @@ public class MultipleInputsTest {
 			this.value = value.trim();
 		}
 
-		@Override
 		public void write(DataOutput out) throws IOException {
 			if (null == out) {
 				throw new IllegalArgumentException("out cannot be null");
@@ -108,7 +106,6 @@ public class MultipleInputsTest {
 			this.additional = addi;
 		}
 
-		@Override
 		public void readFields(DataInput in) throws IOException {
 			if (null == in) {
 				throw new IllegalArgumentException("in cannot be null");
@@ -120,7 +117,6 @@ public class MultipleInputsTest {
 			this.additional = addi;
 		}
 
-		@Override
 		public void write(DataOutput out) throws IOException {
 			if (null == out) {
 				throw new IllegalArgumentException("out cannot be null");

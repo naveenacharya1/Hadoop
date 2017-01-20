@@ -24,14 +24,12 @@ public class ViewedRecord implements Writable {
 		this.recordType = recordType;
 	}
 
-	@Override
 	public void write(DataOutput out) throws IOException {
 		viewCount.write(out);
 		recordType.write(out);
 
 	}
 
-	@Override
 	public void readFields(DataInput in) throws IOException {
 		viewCount.readFields(in);
 		recordType.readFields(in);

@@ -25,14 +25,12 @@ public class RatedRecord implements Writable {
 		this.recordType = recordType;
 	}
 
-	@Override
 	public void write(DataOutput out) throws IOException {
 		rating.write(out);
 		recordType.write(out);
 
 	}
 
-	@Override
 	public void readFields(DataInput in) throws IOException {
 		rating.readFields(in);
 		recordType.readFields(in);
